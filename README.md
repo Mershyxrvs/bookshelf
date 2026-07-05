@@ -63,10 +63,11 @@ npx wrangler pages deploy public --project-name=bookshelf
 
 ## Books
 
-- **50 books** — 27 Burmese, 23 English
-- **16 genres** — Fiction, History, Poetry, Science, Psychology, Business, etc.
-- **15 premium** books (requires subscription)
-- **35 free** books (open to all users)
+- **50 books** — 26 Burmese, 24 English
+- **17 genres** — Fiction, History, Poetry, Science, Psychology, Business, etc.
+- **10 premium** books (requires subscription)
+- **40 free** books (open to all users)
+- The `data/books.json` is the canonical catalog; `mini-app/public/data/books.json` is a build-time copy served to clients
 
 ## Monetization
 

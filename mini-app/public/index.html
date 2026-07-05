@@ -6,6 +6,8 @@
 <meta name="theme-color" content="#FFFDF5">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' https://telegram.org; img-src 'self' data:; connect-src 'self'; frame-ancestors https://web.telegram.org https://telegram.org; base-uri 'self'; form-action 'self'">
+<meta http-equiv="X-Frame-Options" content="ALLOW-FROM https://web.telegram.org">
 <title>စာအုပ်စင် — BookShelf</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -71,6 +73,16 @@ body::after {
   border-radius: 40% 60% 50% 50%;
   pointer-events: none;
   z-index: 0;
+}
+
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--accent);
+  color: #fff;
 }
 
 .container {
@@ -161,15 +173,15 @@ header .subtitle {
   box-shadow: 2px 2px 0px var(--border);
 }
 
-.pill.active {
+.pill[aria-pressed="true"] {
   background: var(--fg);
   color: var(--bg);
   box-shadow: none;
 }
 
-.pill.genre-pill.active { background: var(--pink); color: var(--fg); border-color: var(--fg); }
-.pill.author-pill.active { background: var(--accent); color: #fff; border-color: var(--fg); }
-.pill.lang-pill.active { background: var(--green); color: var(--fg); border-color: var(--fg); }
+.pill.genre-pill[aria-pressed="true"] { background: var(--pink); color: var(--fg); border-color: var(--fg); }
+.pill.author-pill[aria-pressed="true"] { background: var(--accent); color: #fff; border-color: var(--fg); }
+.pill.lang-pill[aria-pressed="true"] { background: var(--green); color: var(--fg); border-color: var(--fg); }
 
 .pill.clear-pill {
   background: var(--red);
@@ -340,6 +352,22 @@ header .subtitle {
 .empty-state h3 { font-family: var(--font-display); font-size: 1.3rem; margin-bottom: 6px; }
 .empty-state p { color: var(--muted); font-size: 0.9rem; }
 
+.btn-retry {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 10px 28px;
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--border);
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  margin-top: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-retry:hover { transform: translateY(-1px); box-shadow: 4px 4px 0px var(--border); }
+
 .loading-state {
   grid-column: 1 / -1;
   text-align: center;
@@ -432,28 +460,28 @@ footer {
   <header>
     <h1>စာအုပ်စင် 📚</h1>
     <p class="subtitle" style="font-family:var(--font-myanmar)">မြန်မာ & အင်္ဂလိပ် စာအုပ်များ</p>
-    <span class="book-count" id="bookCount">Loading...</span>
+    <span class="book-count" id="bookCount" aria-live="polite">Loading...</span>
   </header>
 
-  <section class="filters-section">
-    <div class="filter-group">
-      <div class="filter-label">Genre</div>
-      <div class="genre-scroll"><div class="pill-row" id="genrePills"></div></div>
+  <nav class="filters-section" aria-label="Book filters">
+    <div class="filter-group" role="group" aria-labelledby="genre-label">
+      <div class="filter-label" id="genre-label">Genre</div>
+      <div class="genre-scroll"><div class="pill-row" id="genrePills" role="list"></div></div>
     </div>
-    <div class="filter-group">
-      <div class="filter-label">Author</div>
-      <div class="genre-scroll"><div class="pill-row" id="authorPills"></div></div>
+    <div class="filter-group" role="group" aria-labelledby="author-label">
+      <div class="filter-label" id="author-label">Author</div>
+      <div class="genre-scroll"><div class="pill-row" id="authorPills" role="list"></div></div>
     </div>
-    <div class="filter-group">
-      <div class="filter-label">Language</div>
-      <div class="pill-row" id="langPills"></div>
+    <div class="filter-group" role="group" aria-labelledby="lang-label">
+      <div class="filter-label" id="lang-label">Language</div>
+      <div class="pill-row" id="langPills" role="list"></div>
     </div>
     <div class="pill-row" style="margin-top:4px">
-      <button class="pill clear-pill" id="clearBtn">✕ Clear All Filters</button>
+      <button class="pill clear-pill" id="clearBtn" aria-label="Clear all filters">✕ Clear All Filters</button>
     </div>
-  </section>
+  </nav>
 
-  <div class="book-grid" id="bookGrid">
+  <div class="book-grid" id="bookGrid" role="feed" aria-label="Book catalog">
     <div class="loading-state">
       <div class="emoji">📚</div>
       <h3>စာအုပ်စင် လာပါပြီ...</h3>
@@ -466,13 +494,13 @@ footer {
   </footer>
 </div>
 
-<div class="modal-overlay" id="premiumModal">
+<div class="modal-overlay" id="premiumModal" role="dialog" aria-modal="true" aria-labelledby="premiumModalTitle">
   <div class="modal-card">
-    <h2>⭐ Premium Only</h2>
+    <h2 id="premiumModalTitle">⭐ Premium Only</h2>
     <p class="price">3,000 MMK / month</p>
     <p>ဒီစာအုပ်ကို Premium member တွေပဲ download လုပ်လို့ရပါမယ်။ Premium ဝယ်ယူဖို့ အောက်က bot မှာ ဆက်သွယ်ပါ။</p>
     <p style="font-size:0.8rem">This book is for premium members only. Contact the bot below to subscribe.</p>
-    <button class="btn-close" onclick="closePremiumModal()">Got it!</button>
+    <button class="btn-close" id="premiumCloseBtn" autofocus>Got it!</button>
   </div>
 </div>
 
@@ -488,12 +516,14 @@ footer {
   var books = [];
   var state = { filters: { genre: null, author: null, lang: null } };
 
-  function getAllGenres() {
-    return books.map(function(b) { return b.genre; }).filter(function(v, i, a) { return a.indexOf(v) === i; }).sort();
+  function esc(s) {
+    var el = document.createElement('span');
+    el.textContent = s;
+    return el.innerHTML;
   }
 
-  function getAllAuthors() {
-    return books.map(function(b) { return b.author; }).filter(function(v, i, a) { return a.indexOf(v) === i; }).sort(function(a, b) { return a.localeCompare(b); });
+  function pluck(list, key) {
+    return list.map(function(x) { return x[key]; }).filter(function(v, i, a) { return a.indexOf(v) === i; }).sort();
   }
 
   function getFilteredBooks() {
@@ -507,30 +537,44 @@ footer {
 
   function isNew(addedAt) {
     if (!addedAt) return false;
-    var added = new Date(addedAt);
-    var now = new Date();
-    return (now - added) / (1000 * 60 * 60 * 24) <= 7;
+    return (new Date() - new Date(addedAt)) / (1000 * 60 * 60 * 24) <= 7;
+  }
+
+  function makePill(text, cssClass, pressed, dataset) {
+    var el = document.createElement('button');
+    el.className = 'pill ' + cssClass;
+    el.textContent = text;
+    el.setAttribute('role', 'listitem');
+    el.setAttribute('tabindex', '0');
+    el.setAttribute('aria-pressed', pressed ? 'true' : 'false');
+    for (var key in dataset) {
+      if (dataset.hasOwnProperty(key)) el.dataset[key] = dataset[key];
+    }
+    return el;
   }
 
   function renderFilters() {
-    var genres = getAllGenres();
-    var authors = getAllAuthors();
+    var genres = pluck(books, 'genre');
+    var authors = pluck(books, 'author').sort(function(a, b) { return a.localeCompare(b); });
     var langs = ['ဗမာ', 'English'];
 
-    document.getElementById('genrePills').innerHTML = genres.map(function(g) {
-      var active = state.filters.genre === g ? ' active' : '';
-      return '<button class="pill genre-pill' + active + '" data-genre="' + g.replace(/"/g, '&quot;') + '">' + g + '</button>';
-    }).join('');
+    var genreContainer = document.getElementById('genrePills');
+    genreContainer.textContent = '';
+    genres.forEach(function(g) {
+      genreContainer.appendChild(makePill(g, 'genre-pill', state.filters.genre === g, { genre: esc(g) }));
+    });
 
-    document.getElementById('authorPills').innerHTML = authors.map(function(a) {
-      var active = state.filters.author === a ? ' active' : '';
-      return '<button class="pill author-pill' + active + '" data-author="' + a.replace(/"/g, '&quot;') + '">' + a + '</button>';
-    }).join('');
+    var authorContainer = document.getElementById('authorPills');
+    authorContainer.textContent = '';
+    authors.forEach(function(a) {
+      authorContainer.appendChild(makePill(a, 'author-pill', state.filters.author === a, { author: esc(a) }));
+    });
 
-    document.getElementById('langPills').innerHTML = langs.map(function(l) {
-      var active = state.filters.lang === l ? ' active' : '';
-      return '<button class="pill lang-pill' + active + '" data-lang="' + l + '">' + (l === 'ဗမာ' ? '🇲🇲 ဗမာ' : '🇬🇧 English') + '</button>';
-    }).join('');
+    var langContainer = document.getElementById('langPills');
+    langContainer.textContent = '';
+    langs.forEach(function(l) {
+      langContainer.appendChild(makePill(l === 'ဗမာ' ? '🇲🇲 ဗမာ' : '🇬🇧 English', 'lang-pill', state.filters.lang === l, { lang: l }));
+    });
   }
 
   function renderBooks() {
@@ -540,29 +584,93 @@ footer {
     count.textContent = filtered.length === 1 ? '1 book found' : filtered.length + ' books found';
 
     if (filtered.length === 0) {
-      grid.innerHTML = '<div class="empty-state"><div class="emoji">📭</div><h3>စာအုပ်မရှိပါ</h3><p>ဒီ filter တွေနဲ့ကိုက်ညီတဲ့ စာအုပ်မတွေ့ပါ။ တခြား filter တွေနဲ့ ထပ်ရှာကြည့်ပါ။</p><p style="font-size:0.8rem;margin-top:4px">No books match these filters. Try different ones!</p></div>';
+      grid.innerHTML = '<div class="empty-state" role="status"><div class="emoji" aria-hidden="true">📭</div><h3>စာအုပ်မရှိပါ</h3><p>ဒီ filter တွေနဲ့ကိုက်ညီတဲ့ စာအုပ်မတွေ့ပါ။ တခြား filter တွေနဲ့ ထပ်ရှာကြည့်ပါ။</p><p style="font-size:0.8rem;margin-top:4px">No books match these filters. Try different ones!</p></div>';
       return;
     }
 
-    grid.innerHTML = filtered.map(function(b) {
-      var prem = b.premium;
-      var showNew = isNew(b.addedAt);
-      var premBadge = prem ? '<span class="premium-badge">⭐ Premium</span>' : '';
-      var newBadge = showNew ? '<span class="new-badge">New</span>' : '';
-      var downloadBtn = prem
-        ? '<button class="btn-download premium-locked">⭐ Premium</button>'
-        : '<a class="btn-download" href="' + (b.file || '#') + '" download>📥 Download</a>';
-      var titleFont = b.lang === 'ဗမာ' ? 'var(--font-myanmar), var(--font-display)' : 'var(--font-display)';
+    var fragment = document.createDocumentFragment();
+    filtered.forEach(function(b) {
+      var card = document.createElement('article');
+      card.className = 'book-card';
+      card.setAttribute('role', 'article');
+      card.setAttribute('tabindex', '0');
+      card.setAttribute('aria-label', b.title + ' by ' + b.author);
 
-      return '<div class="book-card">'
-        + '<div class="card-cover" style="background:' + b.bg + '">' + b.cover + premBadge + newBadge + '</div>'
-        + '<div class="card-body">'
-        + '<div class="card-title" style="font-family:' + titleFont + '">' + b.title + '</div>'
-        + '<div class="card-author">' + b.author + '</div>'
-        + '<div class="card-meta"><span class="tag tag-genre">' + b.genre + '</span><span class="tag tag-lang">' + (b.lang === 'ဗမာ' ? '🇲🇲 ဗမာ' : '🇬🇧 English') + '</span></div>'
-        + '<div class="card-actions">' + downloadBtn + '</div>'
-        + '</div></div>';
-    }).join('');
+      var cover = document.createElement('div');
+      cover.className = 'card-cover';
+      cover.style.background = b.bg;
+      cover.textContent = b.cover;
+      cover.setAttribute('aria-hidden', 'true');
+
+      if (b.premium) {
+        var premBadge = document.createElement('span');
+        premBadge.className = 'premium-badge';
+        premBadge.textContent = '⭐ Premium';
+        cover.appendChild(premBadge);
+      }
+      if (isNew(b.addedAt)) {
+        var newBadge = document.createElement('span');
+        newBadge.className = 'new-badge';
+        newBadge.textContent = 'New';
+        cover.appendChild(newBadge);
+      }
+
+      var body = document.createElement('div');
+      body.className = 'card-body';
+
+      var title = document.createElement('div');
+      title.className = 'card-title';
+      title.style.fontFamily = b.lang === 'ဗမာ' ? "var(--font-myanmar), var(--font-display)" : 'var(--font-display)';
+      title.textContent = b.title;
+
+      var author = document.createElement('div');
+      author.className = 'card-author';
+      author.textContent = b.author;
+
+      var meta = document.createElement('div');
+      meta.className = 'card-meta';
+
+      var genreTag = document.createElement('span');
+      genreTag.className = 'tag tag-genre';
+      genreTag.textContent = b.genre;
+
+      var langTag = document.createElement('span');
+      langTag.className = 'tag tag-lang';
+      langTag.textContent = b.lang === 'ဗမာ' ? '🇲🇲 ဗမာ' : '🇬🇧 English';
+
+      meta.appendChild(genreTag);
+      meta.appendChild(langTag);
+
+      var actions = document.createElement('div');
+      actions.className = 'card-actions';
+
+      if (b.premium) {
+        var btn = document.createElement('button');
+        btn.className = 'btn-download premium-locked';
+        btn.textContent = '⭐ Premium';
+        btn.addEventListener('click', showPremiumModal);
+        actions.appendChild(btn);
+      } else {
+        var link = document.createElement('a');
+        link.className = 'btn-download';
+        link.href = b.file || '#';
+        link.setAttribute('download', '');
+        link.textContent = '📥 Download';
+        if (!b.file) link.setAttribute('aria-disabled', 'true');
+        actions.appendChild(link);
+      }
+
+      body.appendChild(title);
+      body.appendChild(author);
+      body.appendChild(meta);
+      body.appendChild(actions);
+      card.appendChild(cover);
+      card.appendChild(body);
+      fragment.appendChild(card);
+    });
+
+    grid.textContent = '';
+    grid.appendChild(fragment);
   }
 
   function setFilter(type, value) {
@@ -581,12 +689,20 @@ footer {
     renderBooks();
   }
 
-  function showPremiumModal() {
+  function showPremiumModal(e) {
+    if (e) e.preventDefault();
     document.getElementById('premiumModal').classList.add('open');
+    document.getElementById('premiumCloseBtn').focus();
+    document.addEventListener('keydown', onModalKeydown);
   }
 
   function closePremiumModal() {
     document.getElementById('premiumModal').classList.remove('open');
+    document.removeEventListener('keydown', onModalKeydown);
+  }
+
+  function onModalKeydown(e) {
+    if (e.key === 'Escape') closePremiumModal();
   }
 
   function attachEvents() {
@@ -600,31 +716,37 @@ footer {
       if (e.target.dataset.lang) setFilter('lang', e.target.dataset.lang);
     });
     document.getElementById('clearBtn').addEventListener('click', clearFilters);
-    document.getElementById('bookGrid').addEventListener('click', function(e) {
-      if (e.target.classList.contains('btn-download') && e.target.textContent.indexOf('Premium') > -1) {
-        e.preventDefault();
-        showPremiumModal();
-      }
-    });
+    document.getElementById('premiumCloseBtn').addEventListener('click', closePremiumModal);
     document.getElementById('premiumModal').addEventListener('click', function(e) {
       if (e.target === this) closePremiumModal();
     });
   }
 
-  fetch('data/books.json')
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      books = data;
-      renderFilters();
-      renderBooks();
-      attachEvents();
-    })
-    .catch(function() {
-      books = [];
-      document.getElementById('bookCount').textContent = 'Failed to load';
-      document.getElementById('bookGrid').innerHTML = '<div class="empty-state"><div class="emoji">😵</div><h3>စာအုပ်တွေ မရောက်သေးပါ</h3><p>Network error. Try again later.</p></div>';
-    });
+  function loadBooks() {
+    fetch('data/books.json')
+      .then(function(r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(function(data) {
+        books = data;
+        renderFilters();
+        renderBooks();
+        attachEvents();
+      })
+      .catch(function(err) {
+        document.getElementById('bookCount').textContent = 'Failed to load';
+        document.getElementById('bookGrid').innerHTML =
+          '<div class="empty-state" role="alert"><div class="emoji" aria-hidden="true">😵</div><h3>Failed to load books</h3><p>Could not reach the catalog. Check your connection.</p><button class="btn-retry" id="retryBtn">Retry</button></div>';
+        document.getElementById('retryBtn').addEventListener('click', function() {
+          document.getElementById('bookGrid').innerHTML =
+            '<div class="loading-state"><div class="emoji">📚</div><h3>Loading...</h3></div>';
+          loadBooks();
+        });
+      });
+  }
 
+  loadBooks();
 })();
 </script>
 </body>

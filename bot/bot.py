@@ -8,7 +8,10 @@ from telegram.ext import Application, CommandHandler, ContextTypes
 logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-TOKEN = os.environ.get("BOT_TOKEN", "YOUR_BOT_TOKEN_HERE")
+TOKEN = os.environ.get("BOT_TOKEN", "")
+
+if not TOKEN:
+    raise RuntimeError("BOT_TOKEN environment variable is required. Set it in your .env file.")
 ADMIN_IDS = [int(x) for x in os.environ.get("ADMIN_IDS", "").split(",") if x.strip()]
 DB_PATH = os.path.join(os.path.dirname(__file__), "premium_users.json")
 BOOKS_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "books.json")
